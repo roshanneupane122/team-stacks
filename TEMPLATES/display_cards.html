@@ -1,0 +1,68 @@
+<!-- templates/booking/display_cards.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hotel and Vehicle Details</title>
+    <style>
+        .section {
+            margin-bottom: 40px;
+        }
+        .section h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            width: 300px;
+            margin: 10px;
+            padding: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .card img {
+            max-width: 100%;
+            border-radius: 8px 8px 0 0;
+        }
+        .card h2 {
+            font-size: 1.5em;
+            margin: 0;
+        }
+        .card p {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="section">
+        <h1>Hotel Details</h1>
+        <div class="card-container">
+            {% for hotel in hotels %}
+                <div class="card">
+                    <img src="{{ hotel.photo.url }}" alt="{{ hotel.name }}">
+                    <h2>{{ hotel.name }}</h2>
+                    <p><strong>Address:</strong> {{ hotel.address }}</p>
+                    <p><strong>Contact:</strong> {{ hotel.contact_number }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="section">
+        <h1>Vehicle Details</h1>
+        <div class="card-container">
+            {% for vehicle in vehicles %}
+                <div class="card">
+                    <img src="{{ vehicle.photo.url }}" alt="{{ vehicle.name }}">
+                    <h2>{{ vehicle.name }}</h2>
+                    <p><strong>Address:</strong> {{ vehicle.address }}</p>
+                    <p><strong>Contact:</strong> {{ vehicle.contact_number }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

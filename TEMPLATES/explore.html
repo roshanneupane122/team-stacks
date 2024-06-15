@@ -1,0 +1,309 @@
+
+   <!DOCTYPE html>
+<html lang="en">
+<head>
+  {% load static %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Holiday Package</title>
+  <link rel="stylesheet" href="{% static 'explore.css' %}">
+</head>
+<body>
+  <div class="container">
+    <h1 id="package-title">3-Day Holiday Package</h1>
+    <!-- Day sections will be dynamically generated here -->
+  </div>
+
+  <!-- Sidebar for additional activities -->
+  <div id="additional-activities-sidebar" class="sidebar">
+    <h2>Additional Activities</h2>
+    <ul id="additional-activities-list">
+      <!-- Additional activities will be dynamically added here -->
+    </ul>
+    <div class="cost-summary" id="cost-summary" style="display: none;">
+      <p id="package-cost">Package Cost: $0</p>
+      <p id="additional-activity-cost">Additional Activities Cost: $0</p>
+      <p id="total-cost">Total Cost: $0</p>
+      <p id="discount" style="display: none;">Discount for First Booking: $50</p>
+      <p id="final-cost" style="display: none;">Final Cost: $0</p>
+    </div>
+  </div>
+
+  <!-- Submit button and Final Pay section -->
+  <div class="submit-button-container" id="submit-button-container" style="display: none;">
+    <button id="submit-button">Submit</button>
+    <div class="final-pay-section" id="final-pay-section">
+      <p class="final-cost">Final Cost: <span id="final-cost-value">$0</span></p>
+      <button id="pay-button">Pay Now</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      let days = [
+        { 
+          title: 'Day 1: Butwal to Baglung',
+          activities: [],
+          placesToVisit: 'Rupse Waterfall - Marpha Village',
+          selectedHotel: '',
+          selectedVehicle: ''
+        },
+        { 
+          title: 'Day 2: Baglung to Johmson',
+          activities: [],
+          placesToVisit: 'Johmson Bazar - Dhumba Lake - Kagbeni',
+          selectedHotel: '',
+          selectedVehicle: ''
+        },
+        { 
+          title: 'Day 3: Sightseeing in , Mustang',
+          activities: [],
+          placesToVisit: 'Chusang - China Border',
+          selectedHotel: '',
+          selectedVehicle: ''
+        }
+      ];
+
+      let fixedPackageCost = 230;
+      let additionalActivitiesCost = 0;
+      let totalCost = fixedPackageCost;
+      let isFirstBooking = true; // Flag to track if it's the first booking
+      const discountAmount = 50;
+
+      function calculateAdditionalActivitiesCost() {
+        let cost = 0;
+        days.forEach(day => {
+          day.activities.forEach(activity => {
+            switch (activity) {
+              case 'Rafting':
+                cost += 30;
+                break;
+              case 'Jungle Safari':
+                cost += 40;
+                break;
+              default:
+                break;
+            }
+          });
+        });
+        return cost;
+      }
+
+      function updateAdditionalActivitiesSidebar() {
+        const additionalActivitiesList = document.getElementById('additional-activities-list');
+        additionalActivitiesList.innerHTML = '';
+
+        days.forEach(day => {
+          day.activities.forEach(activity => {
+            const activityItem = document.createElement('li');
+            activityItem.textContent = `${activity} (Cost: $${getActivityCost(activity).cost})`;
+            activityItem.classList.add('additional-activity-item');
+            additionalActivitiesList.appendChild(activityItem);
+          });
+        });
+
+        additionalActivitiesCost = calculateAdditionalActivitiesCost();
+        totalCost = fixedPackageCost + additionalActivitiesCost;
+
+        days.forEach(day => {
+          totalCost += getVehiclePrice(day.selectedVehicle);
+          totalCost += getHotelPrice(day.selectedHotel);
+        });
+
+        document.getElementById('package-cost').textContent = `Package Cost: $${fixedPackageCost}`;
+        document.getElementById('additional-activity-cost').textContent = `Additional Activities Cost: $${additionalActivitiesCost}`;
+        document.getElementById('total-cost').textContent = `Total Cost: $${totalCost}`;
+
+        applyDiscount(); // Recalculate and apply discount if applicable
+      }
+
+      function getActivityCost(activity) {
+        switch (activity) {
+          case 'Rafting':
+            return { cost: 30 };
+          case 'Jungle Safari':
+            return { cost: 40 };
+          default:
+            return { cost: 0 };
+        }
+      }
+
+      function getVehiclePrice(vehicleType) {
+        switch (vehicleType) {
+          case 'car':
+            return 50;
+          case 'suv':
+            return 70;
+          case 'bike':
+            return 20;
+          default:
+            return 0;
+        }
+      }
+
+      function getHotelPrice(hotelType) {
+        switch (hotelType) {
+          case 'standard':
+            return 80;
+          case 'deluxe':
+            return 120;
+          case 'luxury':
+            return 180;
+          default:
+            return 0;
+        }
+      }
+
+      function applyDiscount() {
+        const finalCost = totalCost - (isFirstBooking ? discountAmount : 0);
+        document.getElementById('total-cost').textContent = `Total Cost: $${totalCost}`;
+        
+        if (isFirstBooking) {
+          document.getElementById('discount').style.display = 'block';
+          document.getElementById('discount').textContent = `Discount for First Booking: $${discountAmount}`;
+          isFirstBooking = false; // Set isFirstBooking to false after applying discount for the first time
+        }
+
+        // Show the submit button and final cost
+        document.getElementById('submit-button-container').style.display = 'block';
+        document.getElementById('final-cost-value').textContent = `$${finalCost}`;
+
+        // Congratulate the user for their first booking
+        if (isFirstBooking) {
+          const congratulationMessage = document.createElement('p');
+          congratulationMessage.textContent = 'Congratulations! This is your first booking with us. Enjoy the discount!';
+          congratulationMessage.style.color = '#4CAF50'; // Green color for emphasis
+          document.getElementById('cost-summary').appendChild(congratulationMessage);
+        }
+      }
+
+      function generateDaySections() {
+        const container = document.querySelector('.container');
+        const packageTitle = document.getElementById('package-title');
+
+        packageTitle.textContent = `${days.length}-Day Holiday Package`;
+
+        container.innerHTML = '';
+
+        days.forEach((day, index) => {
+          const dayDiv = document.createElement('div');
+          dayDiv.classList.add('day');
+          dayDiv.id = `day${index + 1}`;
+
+          const dayTitle = document.createElement('h2');
+          dayTitle.textContent = day.title;
+          dayDiv.appendChild(dayTitle);
+
+          const placesToVisitLabel = document.createElement('label');
+          placesToVisitLabel.textContent = 'Places to Visit:';
+          placesToVisitLabel.classList.add('label');
+          dayDiv.appendChild(placesToVisitLabel);
+
+          const placesToVisit = document.createElement('p');
+          placesToVisit.textContent = day.placesToVisit;
+          placesToVisit.classList.add('places-to-visit');
+          dayDiv.appendChild(placesToVisit);
+
+          const highlightPlaces = day.placesToVisit.split(' - ');
+          highlightPlaces.forEach(place => {
+            const regex = new RegExp(place.trim(), 'gi');
+            placesToVisit.innerHTML = placesToVisit.innerHTML.replace(regex, `<span class="highlight">${place}</span>`);
+          });
+
+          // Dropdown for selecting vehicle
+          const vehicleSelect = document.createElement('select');
+          vehicleSelect.classList.add('select-input');
+          const defaultVehicleOption = document.createElement('option');
+          defaultVehicleOption.value = '';
+          defaultVehicleOption.textContent = 'Select Vehicle';
+          vehicleSelect.appendChild(defaultVehicleOption);
+
+          const carOption = document.createElement('option');
+          carOption.value = 'car';
+          carOption.textContent = 'Car (Cost: $50)';
+  
+          const suvOption = document.createElement('option');
+          suvOption.value = 'suv';
+          suvOption.textContent = 'SUV (Cost: $70)';
+  
+          const bikeOption = document.createElement('option');
+          bikeOption.value = 'bike';
+          bikeOption.textContent = 'Bike (Cost: $20)';
+  
+          vehicleSelect.appendChild(carOption);
+          vehicleSelect.appendChild(suvOption);
+          vehicleSelect.appendChild(bikeOption);
+  
+          const vehicleItem = document.createElement('li');
+          vehicleItem.appendChild(vehicleSelect);
+          dayDiv.appendChild(vehicleItem);
+  
+          vehicleSelect.addEventListener('change', function() {
+            day.selectedVehicle = vehicleSelect.value;
+            updateAdditionalActivitiesSidebar();
+          });
+
+          // Dropdown for selecting hotel
+          const hotelSelect = document.createElement('select');
+          hotelSelect.classList.add('select-input');
+          const defaultHotelOption = document.createElement('option');
+          defaultHotelOption.value = '';
+          defaultHotelOption.textContent = 'Select Hotel';
+          hotelSelect.appendChild(defaultHotelOption);
+  
+          const standardOption = document.createElement('option');
+          standardOption.value = 'standard';
+          standardOption.textContent = 'Standard Hotel (Cost: $80)';
+  
+          const deluxeOption = document.createElement('option');
+          deluxeOption.value = 'deluxe';
+          deluxeOption.textContent = 'Deluxe Hotel (Cost: $120)';
+  
+          const luxuryOption = document.createElement('option');
+          luxuryOption.value = 'luxury';
+          luxuryOption.textContent = 'Luxury Hotel (Cost: $180)';
+  
+          hotelSelect.appendChild(standardOption);
+          hotelSelect.appendChild(deluxeOption);
+          hotelSelect.appendChild(luxuryOption);
+  
+          const hotelItem = document.createElement('li');
+          hotelItem.appendChild(hotelSelect);
+          dayDiv.appendChild(hotelItem);
+  
+          hotelSelect.addEventListener('change', function() {
+            day.selectedHotel = hotelSelect.value;
+            updateAdditionalActivitiesSidebar();
+          });
+
+          // Append the day section to the main container
+          container.appendChild(dayDiv);
+        });
+
+        updateAdditionalActivitiesSidebar(); // Update the sidebar with initial values
+      }
+
+      generateDaySections(); // Generate the day sections initially
+
+      // Event listener for submit button
+      const submitButton = document.getElementById('submit-button');
+      submitButton.addEventListener('click', function() {
+        // Handle submission logic here, such as sending data to server or displaying confirmation
+       
+        window.location.href = 'index';
+      });
+
+      // Event listener for pay button
+      const payButton = document.getElementById('pay-button');
+payButton.addEventListener('click', function() {
+  // Handle payment logic here, such as redirecting to payment gateway
+  
+  
+  // Redirect to homepage after alert
+  window.location.href = 'index';
+});
+      });
+    
+  </script>
+</body>
+</html>
